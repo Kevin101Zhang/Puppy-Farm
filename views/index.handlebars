@@ -1,0 +1,102 @@
+<html>
+
+<head>
+  <title>{{title}}</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <h1 id="title">WELCOME TO PUPPY FARM</h1>
+
+  <div class="kennel left">
+    <h2 class="place-title" id="kennel-title">KENNEL</h2>
+    <ul>
+      {{#each Puppies}}
+      <li>
+        <p class="puppyContainer">
+          {{this.id}}. {{this.puppy_name}}
+          <button data-puppyid="{{this.id}}" data-puppyname="{{this.puppy_name}}" class="adoptPuppy">Adopt</button>
+        </p>
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div class="farm right">
+    <h2 class="place-title" id="farmhouse-title">FARMHOUSE</h2>
+    <ul>
+      {{#each PuppiesAdopted}}
+      <li>
+        <p>
+          {{this.id}}. {{this.puppy_name}}
+          <p data-puppyid="{{this.id}}" class="adoptPuppy"></p>
+        </p>
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+
+
+<div class="puppy-Form">Find A Puppy
+  <form id="addPuppy" class="button-size">
+    <input id="puppy-Input" type="text" name="pup"></input>
+    <button id="find-button" type="submit">Find!</button>
+  </form>
+</div>
+
+</body>
+
+</html>
+<script type="text/javascript">
+  $("#addPuppy").on("submit", function (event) {
+    event.preventDefault();
+
+    var newPuppy = {
+      puppy_name: $("#addPuppy [name=pup]").val().trim()
+    };
+    //Adding A Puppy To Kennel
+    $.ajax("/puppies", {
+      type: "POST",
+      data: newPuppy
+    }).then(
+      function () {
+        console.log("Puppy is Now Up For Adoption");
+        location.reload();
+      }
+    );
+  });
+
+  // Adopt a Puppy
+  $(".adoptPuppy").on("click", function (event) {
+    var id = $(this).data("puppyid");
+
+    var nameOfAdopted = $(this).data("puppyname");
+
+    var adoptedPuppy = {
+      puppy_name: nameOfAdopted
+    };
+
+
+    // Taking Puppy Home
+    $.ajax("/adopted/" + id, {
+      type: "POST",
+      data: adoptedPuppy,
+    }).then(
+      function () {
+        console.log("Puppy is Now Adopted!");
+      }
+    );
+
+    // Removing From Kennel
+    $.ajax("/adopting/" + id, {
+      type: "DELETE"
+    }).then(
+      function () {
+        console.log("deleted id ", id);
+        location.reload();
+      }
+    );
+
+  });
+
+</script>
